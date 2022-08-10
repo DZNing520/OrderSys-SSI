@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--开启注解扫描-->
+    <context:component-scan base-package="com.chinasofti.ordersys"/>
+
+    <!--数据源、事务控制等-->
+    <context:property-placeholder location="classpath:db.properties,classpath:servicePay.properties"></context:property-placeholder>
+    <!--alipay注入-->
+    <bean class="com.chinasofti.ordersys.vo.PayOrder">
+        <property name="appid" value="${alipay.appid} "></property>
+        <property name="url" value="${aplipay.url}"></property>
+        <property name="privateKey" value="${alipay.privateKey}"></property>
+        <property name="publicKey" value="${alipay.publicKey}"></property>
+        <property name="notifyUrl" value="${alipay.notifyUrl}"></property>
+        <property name="returnUrl" value="${alipay.returnUrl}"></property>
+    </bean>
+    <!--数据源-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="url" value="${jdbc.url}"></property>
+        <property name="driverClassName" value="${jdbc.driverClassName}"></property>
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+    <!--配置和MyBatis的整合-->
+    <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--指定配置MyBatis全局配置文件的位置-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--配置扫描器，将mybatis接口的实现加入到ioc容器中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--扫描所有的mapper下的接口，加入到ioc容器中-->
+        <property name="basePackage" value="com.chinasofti.ordersys.mapper"></property>
+    </bean>
+    <!--配置一个可以执行批量的sqlSession-->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactoryBean"></constructor-arg>
+        <constructor-arg name="executorType" value="SIMPLE"></constructor-arg>
+    </bean>
+</beans>
